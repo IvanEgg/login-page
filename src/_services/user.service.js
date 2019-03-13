@@ -17,7 +17,6 @@ function login(email, password) {
     return fetch(`${config.apiUrl}/api/login`, requestOptions)
         .then(handleResponse)
         .then(token => {
-            // store user details and jwt token in local storage to keep user logged in between page refreshes
             localStorage.setItem('token', token);
 
             return token;
@@ -25,8 +24,7 @@ function login(email, password) {
 }
 
 function logout() {
-    // remove user from local storage to log user out
-    localStorage.removeItem('user');
+    localStorage.removeItem('token');
 }
 
 function listUsers() {
@@ -35,7 +33,14 @@ function listUsers() {
         headers: authHeader()
     };
 
-    return fetch(`${config.apiUrl}/api/users?page=2`, requestOptions).then(handleResponse);
+    return fetch(`${config.apiUrl}/api/users?page=2`, requestOptions).then(handleGetUsersResponse);
+}
+
+function handleGetUsersResponse(response) {
+    return response.text().then(text => {
+        const data = text && JSON.parse(text);
+        return data.data;
+    }); 
 }
 
 function handleResponse(response) {
@@ -52,6 +57,6 @@ function handleResponse(response) {
             return Promise.reject(error);
         }
 
-        return data.data;
+        return data;
     });
 }
